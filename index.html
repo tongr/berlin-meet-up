@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+<title>meet up</title>
+</head>
+<body>
+<div id='config'></div>
+<div>
+pos1:
+<input type='text' id='pos1' value='Griebnitzsee'/>
+</div><br/>
+<div>
+pos2:
+<input type='text' id='pos2' value='Ostkreuz'/>
+<!--
+<input type='text' name='pos1' value='Kottbuser Tor'/>
+-->
+</div><br/>
+<input type='button' id='exec' value='execute' />
+</div>
+<div id='content'></div>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="./fahrinfo.js"></script>
+
+<script  type="text/javascript">
+function appendContent(str){
+  $('#content').append(str+'<br/>');
+}
+function appendLinkContent(str) {
+  appendContent('<a href="'+str+'">'+str+'</a>');
+}
+
+function replaceTextWithSelect(id, values) {
+  $('#'+id).replaceWith('<select id="'+id+'"><option>'+values.join('</option><option>')+'</option></select>');
+}
+
+function info(str) {
+  if(str.substring(0,4)=='http') {
+    appendLinkContent(str);
+  } else {
+    appendContent(str);
+  }
+}
+
+Util.debug = info;
+
+$('#exec').bind('click', function() {
+  fahrinfo.query($('#pos1').prop('value'), $('#pos2').prop('value'), 
+    // success: detail page links found
+    function(detailUris) {
+      // find inverse connection
+      fahrinfo.query($('#pos2').prop('value'), $('#pos1').prop('value'), 
+        function(inverseDetailUris) {
+          // TODO extract stations
+          // FIXME these links produce a "leider konnten Ihre Suchergebnisse zwischenzeitlich nicht mehr gespeichert werden" message page in YQL but work out local
+          info('detail uris:');
+          info('-> ');
+          $.each(detailUris, function() {
+            info(this);
+          });
+          info('<- ');
+          $.each(inverseDetailUris, function() {
+            info(this);
+          });
+        },
+        function() {
+          // should not be ambiguous 
+          alert('this shouldn\'t happen');
+        });
+    },
+    // disambiguation necessary
+    function(pos1s, pos2s) {
+      info('<font color="#FF0000">Abiguous position(s) specified! Please select a distinct option.</font>');
+      // positions are ambiguous
+      replaceTextWithSelect('pos1', pos1s);
+      replaceTextWithSelect('pos2', pos2s);
+    }
+  );
+});
+
+</script>
+</body>
+</html>
