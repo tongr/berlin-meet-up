@@ -31,17 +31,17 @@
     <div id="controls">
       <h1>berlin-meet-up</h1>
       <div id="data_canvas">
-      <p>
-        Please select two starting points!
-      </p>
-    </div>
+        <p>
+          Please select two starting points!
+        </p>
+      </div>
     </div>
     <div id="map_canvas"></div>
     <script type="text/javascript" src="js/api_keys.private.js"></script>
     <script type="text/javascript">
       function initialize() {
         // load map of berlin
-        var map = new MeetingGMap("map_canvas", "data_canvas");
+        var map = new GMapsMeetingMap("map_canvas", "data_canvas");
       }
 
       function loadScript() {

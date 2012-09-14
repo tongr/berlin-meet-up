@@ -1,4 +1,7 @@
-function MeetingGMap(map_canvas, data_canvas) {
+// this is a meetin gmap implementation based on the google maps service
+function GMapsMeetingMap(map_canvas, data_canvas) {
+  var _this = this;
+
   // initialize map -> Berlin
   this.map = new google.maps.Map(document.getElementById(map_canvas), {
     center : new google.maps.LatLng(52.5191710, 13.40609120),
@@ -8,36 +11,39 @@ function MeetingGMap(map_canvas, data_canvas) {
 
   // init set of finite markers
   this.markers = [];
-  this.placeMarker = function(event) {
-    var location = event.latLng;
+
+  this.placeMarker = function(location) {
+
     var marker = new google.maps.Marker({
       position : location,
       draggable : true,
       animation : google.maps.Animation.DROP,
-      map : this.map,
+      map : _this.map,
 
     });
-    if (this.markers.length == 2) {
+    if (_this.markers.length == 2) {
       // remove the oldest marker
-      this.markers[0].setMap(null);
-      this.markers.shift()
+      _this.markers[0].setMap(null);
+      _this.markers.shift()
     }
-    this.markers.push(marker);
+    _this.markers.push(marker);
 
     // if there are enough markers -> start routing functionality
-    if (this.markers.length == 2) {
-      this.calcRoute(this.markers[0].position, this.markers[1].position)
+    if (_this.markers.length == 2) {
+      _this.calcRoute(_this.markers[0].position, _this.markers[1].position)
     }
 
     // execute "placeMarker" on drag-drop of an existing (bound) marker
     google.maps.event.addListener(marker, 'dragend', function() {
-      if (this.markers.length == 2) {
-        this.calcRoute(this.markers[0].position, this.markers[1].position)
+      if (_this.markers.length == 2) {
+        _this.calcRoute(_this.markers[0].position, _this.markers[1].position)
       }
-    }.bind(this));
+    });
   };
   // execute "placeMarker" on click
-  google.maps.event.addListener(this.map, 'click', this.placeMarker.bind(this));
+  google.maps.event.addListener(this.map, 'click', function(event) {
+    _this.placeMarker(event.latLng);
+  });
 
   // add calcRoute dummy (not yet implemented)
   this.calcRoute = function(m1, m2) {
