@@ -6,7 +6,8 @@ A little project that helps to find locations to meet up in berlin (via public t
 The project idea is inspired by http://www.mapnificent.net/
 
 APIs:
- * yql - http://developer.yahoo.com/yql/
+ * Yahoo! Query Language (YQL) - http://developer.yahoo.com/yql/
+ * Google Maps JavaScript API v3 (GMaps) - https://developers.google.com/maps/documentation/javascript/
 
 Crawled sources:
  * http://www.bvg.de/
