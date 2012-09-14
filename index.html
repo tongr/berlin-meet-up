@@ -42,6 +42,11 @@
       function initialize() {
         // load map of berlin
         var map = new GMapsMeetingMap("map_canvas", "data_canvas");
+
+        map.addRouteFinder(function(pos1, pos2) {
+          //calc route dummy (not yet implemented)
+          alert('no routing method defined for:\nfind route between ' + pos1.toString() + '\nand ' + pos2.toString());
+        });
       }
 
       function loadScript() {
