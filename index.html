@@ -30,17 +30,18 @@
   <body>
     <div id="controls">
       <h1>berlin-meet-up</h1>
+      <div id="data_canvas">
+      <p>
+        Please select two starting points!
+      </p>
+    </div>
     </div>
     <div id="map_canvas"></div>
     <script type="text/javascript" src="js/api_keys.private.js"></script>
     <script type="text/javascript">
       function initialize() {
         // load map of berlin
-        var map = new google.maps.Map(document.getElementById("map_canvas"), {
-          center : new google.maps.LatLng(52.5191710, 13.40609120),
-          zoom : 11,
-          mapTypeId : google.maps.MapTypeId.ROADMAP
-        });
+        var map = new MeetingGMap("map_canvas", "data_canvas");
       }
 
       function loadScript() {
@@ -53,5 +54,6 @@
 
       window.onload = loadScript;
     </script>
+    <script type="text/javascript" src="js/meet.js"></script>
   </body>
 </html>
