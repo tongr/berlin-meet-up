@@ -43,10 +43,7 @@
         // load map of berlin
         var map = new GMapsMeetingMap("map_canvas", "data_canvas");
 
-        map.addRouteFinder(function(pos1, pos2) {
-          //calc route dummy (not yet implemented)
-          alert('no routing method defined for:\nfind route between ' + pos1.toString() + '\nand ' + pos2.toString());
-        });
+        var gFinder = new GoogleRouteFinder(map);
       }
 
       function loadScript() {
@@ -60,5 +57,6 @@
       window.onload = loadScript;
     </script>
     <script type="text/javascript" src="js/meet.js"></script>
+    <script type="text/javascript" src="js/path.google.js"></script>
   </body>
 </html>
