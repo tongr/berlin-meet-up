@@ -44,6 +44,7 @@
         var map = new GMapsMeetingMap("map_canvas", "data_canvas");
 
         var gFinder = new GoogleRouteFinder(map);
+        var bvgFinder = new BVGRouteFinder(map);
       }
 
       function loadScript() {
@@ -58,5 +59,7 @@
     </script>
     <script type="text/javascript" src="js/meet.js"></script>
     <script type="text/javascript" src="js/path.google.js"></script>
+    <script type="text/javascript" src="js/jquery-1.8.1.min.js"></script>
+    <script type="text/javascript" src="js/path.bvg.js"></script>
   </body>
 </html>
