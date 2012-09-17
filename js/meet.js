@@ -15,6 +15,9 @@ function GMapsMeetingMap(map_canvas, data_canvas) {
   // init set of finite markers
   this.markers = [];
 
+  // init set of meeting points
+  this.meetingPoints = [];
+
   // init set of POIs
   this.pois = [];
 
@@ -23,8 +26,6 @@ function GMapsMeetingMap(map_canvas, data_canvas) {
     this.placeMarker(event.latLng);
   }.bind(this));
 
-  // set the meeting point to undefined
-  this.meetingPoint
 }
 
 // create a method to place markers on the map
@@ -65,6 +66,25 @@ GMapsMeetingMap.prototype.addRouteFinder = function(listener) {
 
 // emit all added calc route methods
 GMapsMeetingMap.prototype.findRoutes = function(pos1, pos2) {
+  // remove old meeting point markers
+  if (this.meetingPoints != undefined) {
+    while (this.meetingPoints.length > 0) {
+      this.meetingPoints.pop().setMap(null);
+    }
+  } else {
+    this.meetingPoints = [];
+  }
+
+  // remove old POIs
+  if (this.pois != undefined) {
+    while (this.pois.length > 0) {
+      this.pois.pop().setMap(null);
+    }
+  } else {
+    this.pois = [];
+  }
+
+  // trigger event
   google.maps.event.trigger(this, 'find_route', pos1, pos2);
 };
 
@@ -78,28 +98,18 @@ GMapsMeetingMap.prototype.writeDetail = function(data) {
 };
 
 GMapsMeetingMap.prototype.findPOIs = function(position, categories, title) {
-  if (this.meetingPoint != undefined) {
-    // remove the old marker
-    this.meetingPoint.setMap(null);
-  }
   // place a meeting point marker
-  this.meetingPoint = new google.maps.Marker({
+  this.meetingPoints.push(new google.maps.Marker({
     position : position,
     map : this.map,
     title : title
-  });
-
-  // remove former POIs
-  if (this.pois != undefined) {
-    while (this.pois.length > 0) {
-      this.pois.pop().setMap(null);
-    }
-  }
+  }));
 
   // find new pois
   if (categories == undefined || categories.length == 0) {
     categories = ['restaurant']
   }
+
   var request = {
     location : position,
     radius : '300',
