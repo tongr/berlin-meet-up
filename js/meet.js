@@ -6,12 +6,17 @@ function GMapsMeetingMap(map_canvas, data_canvas) {
     zoom : 11,
     mapTypeId : google.maps.MapTypeId.ROADMAP
   });
+  this.places = new google.maps.places.PlacesService(this.map);
+  this.infowindow = new google.maps.InfoWindow();
 
   // sesrch for data canvas
   this.data_canvas_div = document.getElementById(data_canvas);
 
   // init set of finite markers
   this.markers = [];
+
+  // init set of POIs
+  this.pois = [];
 
   // execute "placeMarker" on click
   google.maps.event.addListener(this.map, 'click', function(event) {
@@ -84,6 +89,54 @@ GMapsMeetingMap.prototype.findPOIs = function(position, categories, title) {
     title : title
   });
 
-  // dummy (POI search not yet implemented)
-  alert('no poi finder method defined for:\n' + position.toString() + ' (' + title + ')');
+  // remove former POIs
+  if (this.pois != undefined) {
+    while (this.pois.length > 0) {
+      this.pois.pop().setMap(null);
+    }
+  }
+
+  // find new pois
+  if (categories == undefined || categories.length == 0) {
+    categories = ['restaurant']
+  }
+  var request = {
+    location : position,
+    radius : '300',
+    types : categories
+  };
+  // create a GMaps places API request (for POIs)
+  this.places.search(request, function(results, status) {
+    // add all POIs to the map
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+      for (var i = 0; i < results.length; i++) {
+        this.addPOI(results[i]);
+      }
+    }
+  }.bind(this));
+};
+
+GMapsMeetingMap.prototype.addPOI = function(place) {
+  // create a custom Marker (with a special icon)
+  var marker = new google.maps.Marker({
+    map : this.map,
+    icon : new google.maps.MarkerImage(place.icon, null, null, null, new google.maps.Size(20, 20)),
+    position : place.geometry.location
+  });
+
+  // add the marker
+  this.pois.push(marker);
+
+  // show an info window to the marker (at onClick event)
+  google.maps.event.addListener(marker, 'click', function() {
+    // load further details from GMaps places API
+    this.places.getDetails(place, function(place_details, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        var content = '<span style="padding: 0px; text-align:left" align="left"><h5><a  target="_blank" href=' + place_details.url + '>' + place_details.name + '</a>&nbsp; &nbsp; ' + place_details.rating + '</h5><p>' + place_details.formatted_address + '<br />' + place_details.formatted_phone_number + '<br />' + '<a  target="_blank" href=' + place_details.website + '>' + place_details.website + '</a></p>';
+        content = content.replace(/undefined/g, ' ');
+        this.infowindow.setContent(content);
+        this.infowindow.open(this.map, marker);
+      }
+    }.bind(this));
+  }.bind(this));
 };
