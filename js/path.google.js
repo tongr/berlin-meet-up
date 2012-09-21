@@ -32,8 +32,11 @@ function GoogleWaypoint(elapsed_time, data) {
 }
 
 GoogleWaypoint.prototype.htmlInfo = function() {
-  if (this.elapsed_time == 0 || !this.data.instructions) {
+  if (this.elapsed_time == 0 ) {
     return '<b>start</b>';
+  }
+  if (!this.data.instructions) {
+    return;
   }
   return '<b>' + this.data.duration.text + '</b>: ' + this.data.instructions;
 };
@@ -43,11 +46,15 @@ GoogleWaypoint.prototype.getTimeDiff = function(otherWp) {
 };
 
 GoogleRouteFinder.prototype.findConnection = function(from, to, connectionCallback, showConnectionLine) {
+  console.log(JSON.stringify(google.maps.TravelMode.BICYCLING));
   this.directionsSource.route({
     origin : from,
     destination : to,
     provideRouteAlternatives : false,
     travelMode : google.maps.TravelMode.WALKING
+    // not yet working in germany
+    //travelMode : google.maps.TravelMode.BICYCLING
+    //travelMode : google.maps.TravelMode.TRANSIT 
   }, function(response, status) {
     if (status == google.maps.DirectionsStatus.OK) {
       var elapsed_time = 0;
@@ -58,8 +65,18 @@ GoogleRouteFinder.prototype.findConnection = function(from, to, connectionCallba
       }));
       for (var i = 0; i < steps.length; i++) {
         var step = steps[i];
-        elapsed_time += step.duration.value;
+        // interpolate time for the intermediate step
+        var intermediateSteps = step.path;
+        var interpolationTime = elapsed_time;
+        var timeStepDuration = step.duration.value / (1 + intermediateSteps.length);
 
+        for(j = 0; j<intermediateSteps.length;j++) {
+          interpolationTime += timeStepDuration;
+          waypoints.push(new GoogleWaypoint(interpolationTime, {
+            end_location : intermediateSteps[j]
+          }));
+        }
+        elapsed_time += step.duration.value;
         waypoints.push(new GoogleWaypoint(elapsed_time, step));
       }
       if(showConnectionLine) {
@@ -121,11 +138,17 @@ GoogleRouteFinder.prototype.printConnectionDetails = function(waypoints1, waypoi
   this.meetingMap.writeDetail('<h3>Route 1:</h3><ul>');
 
   for (var i = 0; i <= idx1; i++) {
-    this.meetingMap.writeDetail('<li>' + waypoints1[i].htmlInfo() + '</li>');
+    var info = waypoints1[i].htmlInfo();
+    if(info) {
+      this.meetingMap.writeDetail('<li>' + info + '</li>');
+    }
   }
   this.meetingMap.writeDetail('</ul><h3>Route 2:</h3><ul>');
   for (var i = 0; i <= idx2; i++) {
-    this.meetingMap.writeDetail('<li>' + waypoints2[i].htmlInfo() + '</li>');
+    var info = waypoints2[i].htmlInfo();
+    if(info) {
+      this.meetingMap.writeDetail('<li>' + info + '</li>');
+    }
   }
   this.meetingMap.writeDetail('</ul>');
 };
