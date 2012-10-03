@@ -2,7 +2,6 @@ var Time = {};
 
 Time.get = function(h, min, s, forceAfter) {
   var newDate = new Date();
-
   newDate.setHours(h);
   newDate.setMinutes(min);
   if (s != undefined) {
@@ -20,6 +19,16 @@ Time.get = function(h, min, s, forceAfter) {
       newDate.setTime(newDate.getTime() + 86400000);
     }
   }
+  return newDate;
+};
+
+
+Time.now = function() {
+  var newDate = new Date();
+  
+  // ignore milliseconds
+  newDate.setMilliseconds(0);
+  
   return newDate;
 };
 

@@ -17,6 +17,15 @@ describe("time util", function() {
     // parse the time and ensure that it is later than the *future* variable
     expect(Time.parse(Time.toString(now), future).getTime()).toBe(sameTimeTomorrow.getTime());
   });
+
+  it("should know what *now* means", function() {
+    var actual = Time.now();
+    var expected = new Date();
+    expected = new Date(expected.getFullYear(), expected.getMonth(), expected.getDay(), expected.getHours(), expected.getMinutes(), expected.getSeconds());
+    
+    // parse the time and ensure that it is later than the *future* variable
+    expect(actual).toEqual(expected);
+  });
 });
 
 describe("time span instances", function() {
