@@ -97,7 +97,8 @@ GMapsMeetingMap.prototype.writeDetail = function(data) {
   this.data_canvas_div.innerHTML += data;
 };
 
-GMapsMeetingMap.prototype.findPOIs = function(position, categories, title) {
+GMapsMeetingMap.prototype.findPOIs = function(coords, categories, title) {
+  var position = new google.maps.LatLng(coords.latitude, coords.longitude);
   // place a meeting point marker
   this.meetingPoints.push(new google.maps.Marker({
     position : position,
