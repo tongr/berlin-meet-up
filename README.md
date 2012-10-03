@@ -11,3 +11,7 @@ APIs:
 
 Crawled sources:
  * http://www.bvg.de/
+
+frameworks:
+ * jQuery - https://github.com/jquery/jquery or http://jquery.com/
+ * jasmine (unit testing) - http://pivotal.github.com/jasmine/
