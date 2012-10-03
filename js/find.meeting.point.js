@@ -54,8 +54,9 @@ Time.parse = function(timeStr, forceAfter) {
 };
 
 function TimeSpan(secs) {
-  this.elapsed = secs;
+  this.elapsed = Math.abs(parseInt(secs));
 };
+
 TimeSpan.prototype.toString = function() {
   var h = parseInt(this.elapsed / 3600);
   var min = parseInt(this.elapsed / 60) % 60;
@@ -74,12 +75,32 @@ TimeSpan.prototype.equals = function(o) {
   return this.elapsed === o.elapsed;
 };
 
-TimeSpan.between = function(t1, t2) {
-  return new TimeSpan(parseInt(Math.abs(t1.getTime() - t2.getTime()) / 1000));
+TimeSpan.prototype.postpone = function(time) {
+  return new Date(time.getTime() + this.elapsed * 1000);
+};
+
+TimeSpan.prototype.prepone = function(time) {
+  return new Date(time.getTime() - this.elapsed * 1000);
+};
+
+TimeSpan.prototype.add = function(o) {
+  return new TimeSpan(this.elapsed + o.elapsed);
 };
 
 TimeSpan.prototype.diff = function(o) {
-  return new TimeSpan(Math.abs(this.elapsed - o.elapsed));
+  return new TimeSpan(this.elapsed - o.elapsed);
+};
+
+TimeSpan.between = function(t1, t2) {
+  return new TimeSpan((t1.getTime() - t2.getTime()) / 1000);
+};
+
+TimeSpan.inMinutes = function(minutes) {
+  return new TimeSpan(minutes * 60);
+};
+
+TimeSpan.inHours = function(hours) {
+  return new TimeSpan(hours * 3600);
 };
 
 function Coordinates(latitude, longitude) {
@@ -138,7 +159,7 @@ var findMeetingPoints = function(waypoints1, waypoints2) {
     if (j >= 0) {
       var diff = TimeSpan.between(waypoints1[i].time, waypoints2[j].time);
       matches.push({
-        diff : diff,
+        timeDiff : diff,
         wp1 : waypoints1[i],
         wp2 : waypoints2[j]
       });
@@ -146,7 +167,7 @@ var findMeetingPoints = function(waypoints1, waypoints2) {
   }
 
   matches.sort(function(a, b) {
-    return a.diff.compareTo(b.diff);
+    return a.timeDiff.compareTo(b.timeDiff);
   });
 
   // return ranked matches

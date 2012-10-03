@@ -26,10 +26,39 @@ describe("time util", function() {
     // parse the time and ensure that it is later than the *future* variable
     expect(actual).toEqual(expected);
   });
+
+  it("should correctly postpone", function() {
+    var actual = Time.parse("12:13");
+    var delay = new TimeSpan(5 * 60);
+    var expected = Time.parse("12:18");
+    
+    // postpone actual by *delay*
+    expect(delay.postpone(actual)).toEqual(expected);
+  });
+
+  it("should correctly prepone", function() {
+    var actual = Time.parse("12:13");
+    var delay = new TimeSpan(5 * 60);
+    var expected = Time.parse("12:08");
+    
+    // postpone actual by *delay*
+    expect(delay.prepone(actual)).toEqual(expected);
+  });
 });
 
 describe("time span instances", function() {
-  it("should be able to calculate time spans correct", function() {
+  it("should be able to init correctly", function() {    
+    expect(new TimeSpan(24).elapsed).toBe(24);    
+    expect(TimeSpan.inMinutes(3).elapsed).toBe(180);    
+    expect(TimeSpan.inHours(1.5).elapsed).toBe(5400);
+  });
+  
+  it("should be able add/substract correctly", function() {
+    expect(new TimeSpan(24).add(new TimeSpan(24))).toEqual(new TimeSpan(48));
+    expect(new TimeSpan(13).diff(new TimeSpan(24))).toEqual(new TimeSpan(11));
+  });
+  
+  it("should be able to calculate time spans correctly", function() {
     var now = past = new Date();
 
     // create a new Date 1 second later
@@ -110,15 +139,13 @@ describe("meeting point finder", function() {
     var matchings = findMeetingPoints(waypoints1, waypoints2);
     
     expect(matchings.length).toBe(3);
-    
-    console.log(matchings);
 
     // wp_b
-    expect(matchings[0]).toEqual({diff : new TimeSpan(2 * 60), wp1 : waypoints1[1], wp2 : waypoints2[2]});
+    expect(matchings[0]).toEqual({timeDiff : new TimeSpan(2 * 60), wp1 : waypoints1[1], wp2 : waypoints2[2]});
     // wp_d
-    expect(matchings[1]).toEqual({diff : new TimeSpan(4 * 60), wp1 : waypoints1[3], wp2 : waypoints2[0]});
+    expect(matchings[1]).toEqual({timeDiff : new TimeSpan(4 * 60), wp1 : waypoints1[3], wp2 : waypoints2[0]});
     // wp_a
-    expect(matchings[2]).toEqual({diff : new TimeSpan(6 * 60), wp1 : waypoints1[0], wp2 : waypoints2[4]});
+    expect(matchings[2]).toEqual({timeDiff : new TimeSpan(6 * 60), wp1 : waypoints1[0], wp2 : waypoints2[4]});
     // wp_x & wp_y do not match
 
   });
