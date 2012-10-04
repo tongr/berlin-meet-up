@@ -37,11 +37,15 @@ GoogleWaypoint.prototype.init = function(time, data) {
 };
 
 GoogleWaypoint.prototype.htmlInfo = function() {
-  if (!this.data.instructions) {
+  if ( this.data.isStart ) {
     return '<b>start</b>';
+  }
+  if (!this.data.instructions) {
+    return;
   }
   return '<b>' + this.time + '</b>: ' + this.data.instructions;
 };
+
 
 GoogleRouteFinder.prototype.findConnection = function(from, to, connectionCallback, showConnectionLine) {
   this.directionsSource.route({
@@ -49,6 +53,9 @@ GoogleRouteFinder.prototype.findConnection = function(from, to, connectionCallba
     destination : to,
     provideRouteAlternatives : false,
     travelMode : google.maps.TravelMode.WALKING
+    // not yet working in germany
+    //travelMode : google.maps.TravelMode.BICYCLING
+    //travelMode : google.maps.TravelMode.TRANSIT 
   }, function(response, status) {
     if (status == google.maps.DirectionsStatus.OK) {
       var startTime = Time.now();
@@ -57,13 +64,27 @@ GoogleRouteFinder.prototype.findConnection = function(from, to, connectionCallba
       var waypoints = [];
       
       waypoints.push(new GoogleWaypoint(startTime, {
-        end_location : from
+        end_location : from,
+        isStart : true
       }));
       // TODO continue here
       for (var i = 0; i < steps.length; i++) {
         var step = steps[i];
-        elapsedTime = elapsedTime.add(TimeSpan.inMinutes(step.duration.value));
+        // interpolate time for the intermediate step
+        var intermediateSteps = step.path;
+        var interpolatedTime = elapsedTime.postpone(startTime);
+        var timeStepDuration = TimeSpan.inMinutes(step.duration.value / (1 + intermediateSteps.length));
 
+        for(j = 0; j<intermediateSteps.length;j++) {
+          interpolatedTime = timeStepDuration.postpone(interpolatedTime);
+          waypoints.push(new GoogleWaypoint(interpolatedTime, {
+            end_location : intermediateSteps[j]
+          }));
+        }
+        //elapsed_time += step.duration.value;
+        //waypoints.push(new GoogleWaypoint(elapsed_time, step));
+        // calculate end time w/o interpolation values (due to rounding errors)
+	elapsedTime = elapsedTime.add(TimeSpan.inMinutes(step.duration.value));
         waypoints.push(new GoogleWaypoint(elapsedTime.postpone(startTime), step));
       }
       if (showConnectionLine) {
@@ -100,7 +121,9 @@ GoogleRouteFinder.prototype.printConnectionDetails = function(waypoints1, waypoi
 
   // TODO visualization of waypoints has to be synchronized with the matched waypoints (somehow)
   for (var i = 0; i < waypoints1.length; i++) {
-    this.meetingMap.writeDetail('<li>' + waypoints1[i].htmlInfo() + '</li>');
+    var info = waypoints1[i].htmlInfo();
+    if(info)
+      this.meetingMap.writeDetail('<li>' + info + '</li>');
     // stop at the meeting point
     if(meetingCoords.equals(waypoints1[i].coords)) {
       break;
@@ -108,7 +131,9 @@ GoogleRouteFinder.prototype.printConnectionDetails = function(waypoints1, waypoi
   }
   this.meetingMap.writeDetail('</ul><h3>Route 2:</h3><ul>');
   for (var i = 0; i < waypoints2.length; i++) {
-    this.meetingMap.writeDetail('<li>' + waypoints2[i].htmlInfo() + '</li>');
+    var info = waypoints2[i].htmlInfo();
+    if(info)
+      this.meetingMap.writeDetail('<li>' + info + '</li>');
     // stop at the meeting point
     if(meetingCoords.equals(waypoints2[i].coords)) {
       break;
